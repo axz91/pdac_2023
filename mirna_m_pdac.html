@@ -5975,20 +5975,33 @@ function dropdownOnClick(dropdownContent) {
 }
 
 function displayModal(base64URL){ 
-    
- 
-    var modallink = document.getElementById("modal-link");
-    modallink.innerHTML = '<a href="'+base64URL+'" download=" '+ base64URL+'">Download Image<a> ';
-
-
     var modal = document.getElementById("myModal");
     var span = document.getElementById("close");
+    var modallink = document.getElementById("modal-link");
 
-    modal.style.display = "block" 
-    span.onclick = function() { modal.style.display = "none"; }
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
+    var element = document.createElement('a');
+    var clearUrl = base64URL.replace(/^data:image\/\w+;base64,/, '');
+    
+    // element.setAttribute('href', 'data:attachment/image' + base64);
+    element.setAttribute('href', 'data:application/octet-stream;base64,' + encodeURIComponent(clearUrl));
+    element.setAttribute('download', 'chart.jpg');
+    element.innerHTML = "Download Image"
+    
+    console.log(element)
+    modallink.appendChild(element);
+    element.click();
+    
+    
+    // var modallink = document.getElementById("modal-link");
+    // modallink.innerHTML = '<a href="'+base64URL+'" download=" '+ base64URL+'">Download Image<a> ';
+        
+        
+        modal.style.display = "block" 
+        span.onclick = function() { modal.style.display = "none"; }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modallink.removeChild(element)
+                modal.style.display = "none";
         }
     }
 }
@@ -6010,8 +6023,10 @@ function addSaveButtonElement(view_obj, text, type) {
         navigator.userAgent.indexOf('FxiOS') == -1;
         
         if (isSafari){
-            displayModal(link.href);
+            displayModal(url);
+
         } else {
+            // displayModal(link.href);
             link.setAttribute('target', '_blank');
             link.dispatchEvent(new MouseEvent('click'));
         }
