@@ -2822,22 +2822,55 @@ function addSavePlotButton(controlContainer, xy_obj, exp_obj=null,
     dropdownContent.classList.toggle("show");
   }
   
-  function addSaveButtonElement(view_obj, text, type) {
-    // create a save button element for the save dropdown
-    var saveButton = document.createElement("a");
+  function displayModal(base64URL, type){ 
+    var modal = document.getElementById("myModal");
+    var span = document.getElementById("close");
+    var modallink = document.getElementById("modal-link");
+    
+    var element = document.createElement('a');
+    element.innerHTML = "Download Image";
+
+    element.setAttribute('href', base64URL);
+    element.setAttribute('download', 'vega-export.' + type);
+
+    modallink.appendChild(element);
+    element.click();
+
+    modal.style.display = "block" ;
+    span.onclick = function() { modal.style.display = "none"; modallink.removeChild(element) }
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modallink.removeChild(element)
+            modal.style.display = "none";
+        }
+    }
+}
+
+function addSaveButtonElement(view_obj, text, type) {
+  // create a save button element for the save dropdown
+  var saveButton = document.createElement("a");
     saveButton.setAttribute("href", "#");
     saveButton.innerText = text;
     saveButton.onclick = function() {
-      view_obj.toImageURL(type, scaleFactor=3).then(function (url) {
-        var link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('target', '_blank');
-        link.setAttribute('download', 'vega-export.' + type);
-        link.dispatchEvent(new MouseEvent('click'));
-      });
-    };
-    return saveButton;
-  }
+        view_obj.toImageURL(type, scaleFactor=3)
+            .then(function (url) {
+                var link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'vega-export.' + type);
+                
+                var isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && navigator.userAgent && navigator.userAgent.indexOf('CriOS') == -1 && navigator.userAgent.indexOf('FxiOS') == -1;
+                
+                if (isSafari){
+                    displayModal(url, type);
+
+                } else {
+                    link.setAttribute('target', '_blank');
+                    link.dispatchEvent(new MouseEvent('click'));
+                }
+        });
+  };
+  return saveButton;
+}
   
   function addSaveDataElement(state, data, saveAllText, saveSelectText) {
     buttonContainer = document.getElementsByClassName("saveSubset")[0].parentElement;
